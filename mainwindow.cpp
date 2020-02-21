@@ -138,11 +138,23 @@ void MainWindow::onWatchedFutureFinished()
 //![5]
 void MainWindow::heavyOperationQThreadCreate()
 {
-    QThread *thread = QThread::create([=]()->void{onHeavyOperationQThreadCreate();});
-    connect(this, &MainWindow::operationDone, thread, &QThread::quit);
-    connect(thread, &QThread::finished, thread, &QThread::deleteLater);
+    //Guard is needed, because operationDone is a MainWindow signal that could also be emitted by other QThreadCreate::instances
+    //Technically, the call to quit, should keep the thread alive, until its finished.
+    static bool guard(false);
+    if(!guard){
+        guard = true;
+        QThread *thread = QThread::create([=]()->void{onHeavyOperationQThreadCreate();});
+        connect(this, &MainWindow::operationDone, thread, &QThread::quit);
+        connect(thread, &QThread::finished, thread, &QThread::deleteLater);
+        connect(thread, &QThread:: finished, thread, [=]()->void{
+            thread->deleteLater();
+            guard = false;
+        });
 
-    thread->start();
+        thread->start();
+    } else {
+        QMessageBox::warning(this, QString("Guard Warning!"), QString("Thread not yet finished"));
+    }
 }
 
 //![5]
