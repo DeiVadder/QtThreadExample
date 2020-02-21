@@ -31,28 +31,35 @@
     <item>
      <widget class="QPushButton" name="btn1">
       <property name="text">
-       <string>Fibonacci of 44</string>
+       <string>Fibonacci of %1</string>
       </property>
      </widget>
     </item>
     <item>
      <widget class="QPushButton" name="btn2">
       <property name="text">
-       <string>Fibonacci of 44 (WorkerObject)</string>
+       <string>Fibonacci of %1 (WorkerObject)</string>
       </property>
      </widget>
     </item>
     <item>
      <widget class="QPushButton" name="btn3">
       <property name="text">
-       <string>Fibonacci of 44 (WorkerThread)</string>
+       <string>Fibonacci of %1 (WorkerThread)</string>
       </property>
      </widget>
     </item>
     <item>
      <widget class="QPushButton" name="btn4">
       <property name="text">
-       <string>Fibonacci of 44 (QtConcurrent)</string>
+       <string>Fibonacci of %1 (QtConcurrent)</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="btn5">
+      <property name="text">
+       <string>Fibonacci of %1 (QThread::create)</string>
       </property>
      </widget>
     </item>

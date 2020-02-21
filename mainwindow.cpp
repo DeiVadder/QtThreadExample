@@ -1,7 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-//![1]
+//![1,4]
 #include "QMessageBox"
 #include <QElapsedTimer>
 
@@ -21,6 +21,7 @@
 [2] = Worker Object approach
 [3] = Subclass QThread
 [4] = QtConcurrent
+[5] = QThread::Create
 */
 
 MainWindow::MainWindow(QWidget *parent)
@@ -28,6 +29,12 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    ui->btn1->setText(ui->btn1->text().arg(FibonacciNumber));
+    ui->btn2->setText(ui->btn2->text().arg(FibonacciNumber));
+    ui->btn3->setText(ui->btn3->text().arg(FibonacciNumber));
+    ui->btn4->setText(ui->btn4->text().arg(FibonacciNumber));
+    ui->btn5->setText(ui->btn5->text().arg(FibonacciNumber));
 
 //![1]
     connect(ui->btn1, &QPushButton::clicked, this, &MainWindow::heavyOperation);
@@ -39,11 +46,12 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->btn3, &QPushButton::clicked, this, &MainWindow::heavyOperationQThreadSubclass);
 
 //![4]
-    connect(this, &MainWindow::operationDone, this, &MainWindow::onOperationDone);
-
-//![4]
     connect(ui->btn4, &QPushButton::clicked, this, &MainWindow::heavyOperationQtConcurrent);
     connect(&m_futureWatcher, &QFutureWatcher<QPair<quint64,double>>::finished, this, &MainWindow::onWatchedFutureFinished);
+
+//![5]
+    connect(ui->btn5, &QPushButton::clicked, this, &MainWindow::heavyOperationQThreadCreate);
+    connect(this, &MainWindow::operationDone, this, &MainWindow::onOperationDone);
 }
 
 MainWindow::~MainWindow()
@@ -63,7 +71,7 @@ void MainWindow::heavyOperation()
     QMessageBox::information(this,QString("Fibonacci of %1").arg(FibonacciNumber),QString("Result: %1 \n in %2 sec").arg(result).arg(t.elapsed()/1000., 0,'f',1));
 }
 
-//![1]
+//![1,4]
 quint64 MainWindow::fibonacci(quint64 value) {
     if (value == 0)
         return 0;
@@ -103,8 +111,12 @@ void MainWindow::heavyOperationQThreadSubclass()
 //![4]
 void MainWindow::heavyOperationQtConcurrent()
 {
-    QFuture<QPair<quint64, double>> future = QtConcurrent::run(this,&MainWindow::heavyOperationNoGui);
-    m_futureWatcher.setFuture(future);
+    if(m_futureWatcher.isFinished()){
+        QFuture<QPair<quint64, double>> future = QtConcurrent::run(this,&MainWindow::heavyOperationNoGui);
+        m_futureWatcher.setFuture(future);
+    } else {
+        QMessageBox::warning(this, QString("!"), QString("The futur is not done yet!"));
+    }
 }
 
 //![4]
@@ -120,10 +132,31 @@ QPair<quint64, double> MainWindow::heavyOperationNoGui()
 //![4]
 void MainWindow::onWatchedFutureFinished()
 {
-    emit operationDone(m_futureWatcher.result().first, m_futureWatcher.result().second);
+    onOperationDone(m_futureWatcher.result().first, m_futureWatcher.result().second);
 }
 
-//![2,3,4]
+//![5]
+void MainWindow::heavyOperationQThreadCreate()
+{
+    QThread *thread = QThread::create([=]()->void{onHeavyOperationQThreadCreate();});
+    connect(this, &MainWindow::operationDone, thread, &QThread::quit);
+    connect(thread, &QThread::finished, thread, &QThread::deleteLater);
+
+    thread->start();
+}
+
+//![5]
+void MainWindow::onHeavyOperationQThreadCreate()
+{
+    QElapsedTimer t;
+    t.start();
+
+    quint64 result = fibonacci(FibonacciNumber);
+
+    emit operationDone(result, t.elapsed()/1000.);
+}
+
+//![2,3,4,5]
 void MainWindow::onOperationDone(quint64 result, double time)
 {
     QMessageBox::information(this,QString("Fibonacci of %1").arg(FibonacciNumber),QString("Result (threaded): %1 \n in %2 sec").arg(result).arg(time, 0,'f',1));

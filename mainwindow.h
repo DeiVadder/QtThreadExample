@@ -27,6 +27,8 @@ public slots:
 
     void heavyOperationQtConcurrent();
 
+    void heavyOperationQThreadCreate();
+
 signals:
     void operationDone(quint64 result, double time);
 
@@ -35,6 +37,8 @@ private slots:
 
     QPair<quint64, double> heavyOperationNoGui();
     void onWatchedFutureFinished();
+
+    void onHeavyOperationQThreadCreate();
 
 private:
     quint64 fibonacci(quint64 value);
