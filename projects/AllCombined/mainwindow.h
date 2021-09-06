@@ -31,6 +31,8 @@ public slots:
 
 signals:
     void operationDone(quint64 result, double time);
+    void stopAnimation();
+    void cancelSignal();
 
 private slots:
     void onOperationDone(quint64 result, double time);
@@ -42,6 +44,7 @@ private slots:
 
 private:
     quint64 fibonacci(quint64 value);
+    std::atomic<bool> m_cancel{false};
 private:
     Ui::MainWindow *ui;
 

@@ -11,14 +11,20 @@ void WorkerThread::heavyOperation()
     QElapsedTimer t;
     t.start();
 
-    quint64 result = fibonacci(FibonacciNumber);
-    double time = t.elapsed()/1000.0;
+    try {
+        quint64 result = fibonacci(FibonacciNumber);
+        double time = t.elapsed()/1000.0;
 
-    emit operationDone(result, time);
+        emit operationDone(result, time);
+    }  catch (int) {
+        emit operationCanceled();
+    }
 }
 
 quint64 WorkerThread::fibonacci(quint64 value)
 {
+    if(m_cancel)
+        throw -1;
     if (value == 0)
         return 0;
     if (value == 1)

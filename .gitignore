@@ -1,0 +1,5 @@
+#QtCreator specific files that are highly depending on the PC#
+*.user
+
+#macOS filesystem files
+*.DS_Store
