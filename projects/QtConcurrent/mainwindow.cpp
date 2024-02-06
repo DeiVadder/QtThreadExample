@@ -49,7 +49,11 @@ quint64 MainWindow::fibonacci(quint64 value) {
 void MainWindow::heavyOperationQtConcurrent()
 {
     if(m_futureWatcher.isFinished()){
+#if QT_VERSION > QT_VERSION_CHECK(6, 0, 0)
+        QFuture<QPair<quint64, double>> future = QtConcurrent::run(&MainWindow::heavyOperationNoGui, this);
+#else \
         QFuture<QPair<quint64, double>> future = QtConcurrent::run(this,&MainWindow::heavyOperationNoGui);
+#endif
         //QFutures resulting from a QtConcurrent::run call can not be canceld via  QFutureWatcher::cancel call,
         //We'll have to use an atomic bool to check and modify.
         m_futureWatcher.setFuture(future);

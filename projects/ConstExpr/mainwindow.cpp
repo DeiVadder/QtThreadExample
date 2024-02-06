@@ -47,7 +47,7 @@ void MainWindow::fibonacciByTheCompiler()
     t.start();
 
     //Any value higher than 25 may break on compilers like clang because they don't do any memoization of constexpr evaluation
-    constexpr auto result = fibonacci(25);
+    constexpr auto result = fibonacci(24);
 
     emit stopAnimation();
     QMessageBox::information(this,QString("Fibonacci of %1").arg(FibonacciNumber),QString("Result: %1 \n in %2 sec").arg(result).arg(t.elapsed()/1000., 0,'f',1));
